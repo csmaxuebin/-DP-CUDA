@@ -1,10 +1,8 @@
-# 本代码是论文《Unsupervised Domain Adaptation with Differentially Private Gradient Projection》的源码实现
-
-
-
-## 论文简介
+# This code is the source code implementation for the paper "Unsupervised Domain Adaptation with Differentially Private Gradient Projection"
+## Abstract
+Domain adaptation is a viable solution for handling small datasets in deep learning. However, domain adaptation models trained on data containing sensitive information may violate personal privacy. In this paper, we propose a solution for unsupervised domain adaptation, called DP-CUDA, which is based on differentially private gradient projection and contradistinguisher features. Compared with traditional domain adaptation processes, DP-CUDA first searches for domain-invariant features between the source and target domains and then transfers knowledge. Specifically, the model is trained in the source domain by supervised learning from labeled data. During the target model's training, feature learning is directly used in an end-to-end manner using unlabeled data, and differentially private noise is injected into the gradients. We conducted extensive experiments on various benchmark datasets including MNIST, USPS, SVHN, VisDA-2017, Office-31, and Amazon Review to demonstrate the utility and privacy-preserving properties of our proposed method. Paper access: https://doi.org/10.1155/2023/8426839
 ![DP-CUDA框架图](https://github.com/csmaxuebin/-DP-CUDA/blob/main/pic/pic/1.png)
-领域适应是深度学习中处理小数据集的一个可行解决方案。然而，基于包含敏感信息数据训练的领域适应模型可能会侵犯个人隐私。在本文中，我们提出了一种无监督领域适应的解决方案，称为DP-CUDA，该方案基于差分隐私梯度投影和对立特征识别。与传统的领域适应过程相比，DP-CUDA首先在源域和目标域之间寻找域不变特征，然后进行知识转移。具体来说，模型在源域通过有标签数据的监督学习进行训练。在目标模型的训练过程中，使用未标记数据直接以端到端的方式进行特征学习解决分类任务，并在梯度中注入差分隐私噪声。我们在多个基准数据集上进行了广泛的实验，包括MNIST、USPS、SVHN、VisDA-2017、Office-31和Amazon Review，以展示我们提出的方法的效用和隐私保护特性。论文访问地址：(https://doi.org/10.1155/2023/8426839)
+
 # Reference
 ```
 @article{zheng2023unsupervised,
@@ -20,77 +18,69 @@
 ```
 
 
-# 实验环境
+# Experimental Environment
 
-- Python 3.6 (Anaconda Python recommended)
+```
+- Python 3.6.8 (Anaconda Python recommended)
+- PyTorch 1.4.0
+- torchvision 0.5.0
+- nltk 3.4.5
+- pandas 1.0.1
+- scipy 1.4.1
+- tqdm 4.42.1
+- six 1.14.0
+- backpack-for-pytorch 1.0.0
+- scikit-image 0.16.2
+- scikit-learn 0.22.1
+- tensorboardX 2.0
+- tensorflow 1.13.1 (specifically for tensorboard visualizations)
+```
 
-- PyTorch
-
-- torchvision
-
-- nltk
-
-- pandas
-
-- scipy
-
-- tqdm
-
-- six
-
-- backpack-for-pytorch
-
-- scikit-image
-
-- scikit-learn
-
-- tensorboardX
-
-- tensorflow==1.13.1 (for tensorboard visualizations)
-
-## 数据集
-`本代码所使用的数据集如下，均为公开数据集
-MNIST、USPS、SVHN、VisDA-2017、Office-31、Amazon Review`
+## Datasets
+`MNIST、USPS、SVHN、VisDA-2017、Office-31、Amazon Review`
 ![数据集详情](https://github.com/csmaxuebin/-DP-CUDA/blob/main/pic/pic/2.png))
 ![输入图片说明](https://github.com/csmaxuebin/-DP-CUDA/blob/main/pic/pic/3.png)
 
-## 实验设置
+## Experimental Setup
 
--   **视觉域任务设置**：
-    
-    -   **基线方法**：包括DPOT、DPSWD以及CUDA（非隐私保护版本的DP-CUDA）。
-    -   **具体技术**：
-        -   **DPOT**：通过Johnson-Lindenstrauss变换处理源域数据，并在目标域释放经过拉普拉斯噪声处理的随机矩阵。
-        -   **DPSWD**：计算源域和目标域之间的切片Wasserstein距离，通过最小化该距离实现域自适应。
-    -   **模型架构**：使用ResNet-152作为基础模型，采用ReLU激活函数。
-    -   **实验环境**：使用PyTorch框架，运行在配备有40 GB视频内存的Tesla A100 GPU上。
--   **语言域任务设置**：
-    
-    -   **基线方法**：包括DPDA、G-DPDA以及CUDA。
-    -   **具体技术**：
-        -   **DPDA**：在特征提取器和领域分类器的特定层中添加高斯噪声，通过领域分类器判断数据来自源域还是目标域。
-        -   **G-DPDA**：DPDA的增强版本，增加了噪声扰动，同时保护源域和目标域数据。
-    -   **模型架构**：编码器包含50个神经元的隐藏层用于特征提取，分类器使用全连接层和Sigmoid激活函数。
-    -   **数据集**：使用Amazon Reviews数据集进行实验。
--   **参数设置**：
-    
-    -   **学习率**：使用Adam优化器，初始学乃率设为0.001，每30个epoch衰减率为0.6。
-    -   **隐私预算**：探索隐私预算k的不同设置（k = 2，5，8，10）对模型性能的影响。
-    -   **基向量数量**：设置为k = 1000，用于构建投影子空间。
+-   **Visual Domain Task Settings**:
+    -   **Baseline Methods**: Include DPOT, DPSWD, and CUDA (non-private version of DP-CUDA).
+    -   **Specific Techniques**:
+        -   **DPOT**: Processes source domain data through Johnson-Lindenstrauss transformation and releases a random matrix treated with Laplace noise to the target domain.
+        -   **DPSWD**: Calculates the sliced Wasserstein distance between the source and target domains, similar to MMD, to achieve domain adaptation.
+    -   **Model Architecture**: Uses ResNet-152 as the base model with ReLU activation.
+    -   **Experimental Environment**: Uses the PyTorch framework, running on a Tesla A100 GPU with 40 GB of video memory.
+-   **Language Domain Task Settings**:
+    -   **Baseline Methods**: Include DPDA, G-DPDA, and CUDA.
+    -   **Specific Techniques**:
+        -   **DPDA**: Adds Gaussian noise to specific layers of the feature extractor and domain classifier, which determines whether the data comes from the source or target domain.
+        -   **G-DPDA**: An enhanced version of DPDA that adds noise perturbation to protect both the source and target domain data.
+    -   **Model Architecture**: The encoder contains a hidden layer of 50 neurons for feature extraction, while the classifier uses a fully connected layer with sigmoid activation.
+    -   **Dataset**: Uses the Amazon Reviews dataset for experiments.
+## Python Files
+Here are the English translations for the descriptions of the Python files you provided:
+1. **lr_schedule.py** - Responsible for learning rate scheduling, adjusting the learning rate during the training process to improve model convergence.
+2. **main.py** - The entry point of the program, controlling the entire execution flow, including data loading, training process, model evaluation, etc.
+3. **mmd.py** - May contain implementations of Maximum Mean Discrepancy (MMD), used to compare the similarity of data distributions between source and target domains.
+4. **rdp_accountant.py** - Manages and accounts for the privacy budget in differential privacy applications, especially using Rényi Differential Privacy (RDP) methods.
+5. **util.py** - Contains helper functions used in the project, such as data handling, metric calculations, etc.
+6. **basis_matching.py** - May involve methods for matching basis vectors in different spaces, used in applications where data representation alignment is required.
+7. **cmdline_helpers.py** - Contains helper functions for command line interface operations, such as parameter parsing and command logging.
 
-##  实验结果
-图4和表4展示四种方法在八组视觉任务中的测试准确度
+##  Experimental Results
+Figures 4 and Tables 4 show the test accuracy of four methods in eight groups of visual tasks.
 
 ![输入图片说明](https://github.com/csmaxuebin/-DP-CUDA/blob/main/pic/pic/4.png)
 ![输入图片说明](https://github.com/csmaxuebin/-DP-CUDA/blob/main/pic/pic/5.png)
-图5和表5展示四种方法在语言任务中的测试准确度
+Figures 5 and Tables 5 show the test accuracy of four methods in language tasks.
 ![输入图片说明](https://github.com/csmaxuebin/-DP-CUDA/blob/main/pic/pic/6.png)
 ![输入图片说明](https://github.com/csmaxuebin/-DP-CUDA/blob/main/pic/pic/7.png)
 
 ## Update log
 
 ```
- - {24.06.13}上传整体框架代码和reademe文件
+- {24.06.13} Uploaded overall framework code and readme file
+
 ```
 
 
